@@ -19,11 +19,9 @@
       </div>
     </div>
 
-    <!--<button @click="submitGuess">Submit Guess</button>-->
-
     <div class="keyboard">
       <div v-for="(row, rowIndex) in keyboardRows" :key="rowIndex" class="row">
-        <button v-for="key in row" :key="key" @click="simulateKeyPress(key)">
+        <button v-for="(key, colIndex) in row" :key="colIndex" @click="simulateKeyPress(key)" :class="getKeyClass(key, rowIndex, colIndex)">
           {{ key }}
         </button>
 
@@ -66,9 +64,9 @@ export default {
       row[currentCol.value].focus();
 
       document.addEventListener('keydown', function(event) {
-        if (event.keyCode === 13){
+        if (event.key === 'Enter'){
           submitGuess();
-        } else if (event.keyCode === 8 && currentCol.value > 0) {
+        } else if (event.key === 'Backspace' && currentCol.value > 0) {
           const row = getCurrentRow();
 
           if (row[currentCol.value].value === "") {
@@ -86,20 +84,7 @@ export default {
       const inputs = getCurrentRow();
       inputs[currentCol.value].focus;
     }
-
-    const simulateKeyPress = (key) => {
-      const event = new KeyboardEvent('keydown', {
-        key: key,
-        bubbles: true,
-        cancelable: true,
-      });
-      keepFocus();
-      console.log(key)
-      setTimeout(() => {
-        document.dispatchEvent(event);
-      }, 200);
-    }
-
+    
     const grid = ref([
       ["", "", "", "", ""],
       ["", "", "", "", ""],
@@ -128,6 +113,69 @@ export default {
     const theWordCopy = ref("");
     const allLetters = reactive([]);
 
+    const resetGame = () => {
+      showDialog.value = false;
+      guesses.value = [];
+      currentCol.value = 0;
+      currentRow.value = 0;
+      grid.value = [
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""],
+      ["", "", "", "", ""]
+      ];
+      theWordCopy.value = "";
+      theWord.value = "";
+      enterGuess.value = false;
+      removeLetter.value = false;
+      win.value = false;
+      alreadyGuessed.length = 0;
+      allLetters.length = 0;
+
+      setTimeout(() => {
+        selectTheWord(); 
+      }, 200);
+
+      nextTick(() => {
+        const inputs = document.querySelectorAll('.letter-input');
+        inputs[currentCol.value].focus();
+      });
+    }
+
+    const simulateKeyPress = (key) => {
+
+      if (key === 'Backspace' || key === 'Enter') {
+        const event = new KeyboardEvent('keydown', {
+          key: key,
+          bubbles: true,
+          cancelable: true,
+        });
+
+        document.dispatchEvent(event);
+        if (key === 'Backspace') {
+          grid.value[currentRow.value][currentCol.value] = "";
+        }
+      } else {
+        grid.value[currentRow.value][currentCol.value] = key;
+        moveToNextLetter(currentCol.value)
+      }
+    }
+
+    const getKeyClass = (key, rowIndex, colIndex) => {
+      let keyClass = "";
+      if (alreadyGuessed[rowIndex]) {
+        for (let i = 0; i < alreadyGuessed[i].length; i++){
+          for (let ii = 0; ii < alreadyGuessed[i][ii].length; ii++){
+            console.log(alreadyGuessed[i][ii]);
+          }
+        }
+      }
+      return keyClass
+    }
+
+
     const getLetterClass = (letter, rowIndex, colIndex) => {
       const guess = guesses.value[rowIndex];
       const correctLetter = theWord.value[colIndex];
@@ -138,8 +186,7 @@ export default {
           if (!alreadyGuessed[rowIndex]) {
             alreadyGuessed[rowIndex] = [];
           }
-
-          // If the letter is already guessed for this position, return its class
+          
           if (alreadyGuessed[rowIndex][colIndex]) {
             return alreadyGuessed[rowIndex][colIndex].class;
           }
@@ -160,7 +207,6 @@ export default {
               if (allLetters[i].letter === letter) {
                 if (allLetters[i].count > 0) {
                   allLetters[i].count--;
-                  console.log(allLetters[i])
                   break;
                 }
               }
@@ -239,30 +285,6 @@ export default {
         }
       }
       return true;
-    }
-
-    const resetGame = () => {
-      showDialog.value = false;
-      guesses.value = [];
-      currentCol.value = 0;
-      currentRow.value = 0;
-      grid.value = [
-      ["", "", "", "", ""],
-      ["", "", "", "", ""],
-      ["", "", "", "", ""],
-      ["", "", "", "", ""],
-      ["", "", "", "", ""],
-      ["", "", "", "", ""]
-      ];
-
-      setTimeout(() => {
-        selectTheWord(); 
-      }, 200);
-
-      nextTick(() => {
-        const inputs = document.querySelectorAll('.letter-input');
-        inputs[currentCol.value].focus();
-      });
     }
 
     const getCurrentRow = () => {
@@ -348,6 +370,7 @@ export default {
       getAllLetters,
       simulateKeyPress,
       keepFocus,
+      getKeyClass,
     }
   }
 }
