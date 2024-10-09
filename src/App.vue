@@ -4,7 +4,7 @@
       <template v-slot:prepend>
         <nav>
           <RouterLink to="/">Home</RouterLink>
-          <RouterLink to="/about">About</RouterLink>
+          <RouterLink to="/wordle">Worlde</RouterLink>
         </nav>
       </template>
     </v-app-bar>

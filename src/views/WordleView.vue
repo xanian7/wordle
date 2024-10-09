@@ -5,20 +5,30 @@
         v-for="(letter, colIndex) in row"
         :key="colIndex"
         class="letter-box"
-        :class="getLetterClass(rowIndex, colIndex)"
+        :class="getLetterClass(letter.toUpperCase(), rowIndex, colIndex)"
       >
         <input
           v-if="rowIndex === currentRow"
           v-model="grid[rowIndex][colIndex]"
           maxlength="1"
           @input="moveToNextLetter(colIndex)"
+          @blur="keepFocus()"
           class="letter-input"
         />
         <span v-else>{{ letter }}</span>
       </div>
     </div>
 
-    <button @click="submitGuess">Submit Guess</button>
+    <!--<button @click="submitGuess">Submit Guess</button>-->
+
+    <div class="keyboard">
+      <div v-for="(row, rowIndex) in keyboardRows" :key="rowIndex" class="row">
+        <button v-for="key in row" :key="key" @click="simulateKeyPress(key)">
+          {{ key }}
+        </button>
+
+      </div>
+    </div>
   </div>
 
   <v-dialog
@@ -42,7 +52,7 @@
 </template>
 
 <script>
-import { ref, onMounted, nextTick, onBeforeMount } from 'vue'
+import { ref, onMounted, nextTick, onBeforeMount, reactive } from 'vue'
 
 export default {
   setup() {
@@ -72,6 +82,24 @@ export default {
       });
     });
 
+    const keepFocus = () => {
+      const inputs = getCurrentRow();
+      inputs[currentCol.value].focus;
+    }
+
+    const simulateKeyPress = (key) => {
+      const event = new KeyboardEvent('keydown', {
+        key: key,
+        bubbles: true,
+        cancelable: true,
+      });
+      keepFocus();
+      console.log(key)
+      setTimeout(() => {
+        document.dispatchEvent(event);
+      }, 200);
+    }
+
     const grid = ref([
       ["", "", "", "", ""],
       ["", "", "", "", ""],
@@ -79,6 +107,12 @@ export default {
       ["", "", "", "", ""],
       ["", "", "", "", ""],
       ["", "", "", "", ""]
+    ]);
+
+    const keyboardRows = ref([
+      ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+      ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+      ["Enter", "Z", "X", "C", "V", "B", "N", "M", "Backspace"],
     ]);
 
     const theWord = ref("");
@@ -90,23 +124,74 @@ export default {
     const showDialog = ref(false);
     const allWords = ref([]);
     const win = ref(false);
+    const alreadyGuessed = reactive([]);
+    const theWordCopy = ref("");
+    const allLetters = reactive([]);
 
-    const getLetterClass = (rowIndex, colIndex) => {
+    const getLetterClass = (letter, rowIndex, colIndex) => {
       const guess = guesses.value[rowIndex];
       const correctLetter = theWord.value[colIndex];
 
       if (guess) {
-        const letter = guess[colIndex];
-        if (checkForWin(guess)){
-          win.value = true;
-          showDialog.value = true;
-        }
-        if (letter === correctLetter){
-          return "correct";
-        } else if (theWord.value.includes(letter)){
-          return "misplaced";
-        } else {
-          return "incorrect";
+        if (guess.length === 5) {
+
+          if (!alreadyGuessed[rowIndex]) {
+            alreadyGuessed[rowIndex] = [];
+          }
+
+          // If the letter is already guessed for this position, return its class
+          if (alreadyGuessed[rowIndex][colIndex]) {
+            return alreadyGuessed[rowIndex][colIndex].class;
+          }
+
+          if (alreadyGuessed[rowIndex][colIndex]) {
+            return alreadyGuessed[rowIndex][colIndex].class;
+          }
+            
+          if (checkForWin(guess)){
+            win.value = true;
+            showDialog.value = true;
+          }
+
+          let letterClass = ""
+          if (letter === correctLetter){
+            theWordCopy.value = removeLetterAtIndex(theWordCopy.value, colIndex);
+            for (let i = 0; i < allLetters.length; i++) {
+              if (allLetters[i].letter === letter) {
+                if (allLetters[i].count > 0) {
+                  allLetters[i].count--;
+                  console.log(allLetters[i])
+                  break;
+                }
+              }
+            }
+            letterClass = "correct";
+          } else if (theWordCopy.value.includes(letter)){
+            for (let i = 0; i < allLetters.length; i++) {
+              if (allLetters[i].letter === letter) {
+                  for (let ii = 0; ii < guess.length; ii++) {
+                    if (theWord.value[ii] === guess[ii] && guess[ii] === letter) {
+                      allLetters[i].count--;
+                    }
+                  }
+                
+                if (allLetters[i].count > 0) {
+                  letterClass = "misplaced";
+                  allLetters[i].count--;
+                  break;
+                } else {
+                  letterClass = "incorrect";
+                  break;
+                }
+              }
+            }
+          } else {
+            letterClass = "incorrect";
+          }
+
+          alreadyGuessed[rowIndex][colIndex] = {letter: letter, class: letterClass}
+
+          return letterClass
         }
       }
       return "";
@@ -127,11 +212,13 @@ export default {
         currentRow.value++;
         currentCol.value = 0;
         enterGuess.value = true;
+        theWordCopy.value = theWord.value;
         if (currentRow.value < 6){
           focusNextRow();
         } else {
           showDialog.value = true
         }
+        getAllLetters();
       }
     }
 
@@ -185,14 +272,36 @@ export default {
     const readFileToList = async () => {
       const response = await fetch('/src/assets/wordle-solutions-08MAY2022.txt')
       if (response.ok) {
-        allWords.value = await (await response.text()).split('\n');
+        allWords.value = (await response.text()).split('\n');
       }
     }
 
     const selectTheWord = () => {
       const random = Math.floor(Math.random() * allWords.value.length);
       theWord.value = allWords.value[random].toUpperCase();
+      theWordCopy.value = theWord.value;
       console.log(theWord.value)
+
+      getAllLetters();
+    }
+
+    const getAllLetters = () => {
+      allLetters.length = 0; 
+      for (let i = 0; i < theWord.value.length; i++){
+        let letterExists = false;
+
+        for (let ii = 0; ii < allLetters.length; ii++) {
+          if (allLetters[ii].letter === theWord.value[i]) {
+            allLetters[ii].count++; 
+            letterExists = true;
+            break;
+          }
+        }
+
+        if (!letterExists) {
+          allLetters.push({ letter: theWord.value[i], count: 1 });
+        }
+      }
     }
 
     const getDialogHeader = () => {
@@ -201,6 +310,16 @@ export default {
       } else {
         return "You lost. The word was: " + theWord.value;
       }
+    }
+
+    const removeLetterAtIndex = (str, index) => {
+      // If the index is out of bounds, return the string unchanged
+      if (index < 0 || index >= str.length) {
+        return str;
+      }
+
+      // Use slice to remove the letter at the specified index
+      return str.slice(0, index) + str.slice(index + 1);
     }
 
     return {
@@ -212,6 +331,9 @@ export default {
       showDialog,
       allWords,
       win,
+      alreadyGuessed,
+      allLetters,
+      keyboardRows,
       getLetterClass,
       moveToNextLetter,
       submitGuess,
@@ -222,6 +344,10 @@ export default {
       readFileToList,
       selectTheWord,
       getDialogHeader,
+      removeLetterAtIndex,
+      getAllLetters,
+      simulateKeyPress,
+      keepFocus,
     }
   }
 }
@@ -276,5 +402,32 @@ export default {
   background-color: #787c7e;
   color: white;
   border-color: #787c7e;
+}
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.row {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+}
+
+button {
+  min-width: 40px;
+  min-height: 40px;
+  font-size: 1.2rem;
+  background-color: #eee;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #ccc;
 }
 </style>
