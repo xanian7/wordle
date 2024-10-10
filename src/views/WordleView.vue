@@ -1,22 +1,33 @@
 <template>
   <div class="wordle-container">
-    <div v-for="(row, rowIndex) in grid" :key="rowIndex" class="row" :id="'row-' + rowIndex">
-      <div
-        v-for="(letter, colIndex) in row"
+    <div v-for="(row, rowIndex) in grid"
+      :key="rowIndex"
+      class="row"
+      :id="'row-' + rowIndex"
+      >
+      <div v-for="(letter, colIndex) in row"
         :key="colIndex"
         class="letter-box"
-        :class="getLetterClass(letter.toUpperCase(), rowIndex, colIndex)"
-        :id="'col-' + rowIndex + '.' + colIndex"
+        :id="'col-' + rowIndex + '-' + colIndex"
       >
-        <input
-          v-if="rowIndex === currentRow"
-          v-model="grid[rowIndex][colIndex]"
-          maxlength="1"
-          @input="moveToNextLetter(colIndex)"
-          @blur="keepFocus()"
-          class="letter-input"
-        />
-        <span v-else>{{ letter }}</span>
+        <div class="letter-box-inner">
+          <div class="letter-box-front">
+            <input
+              v-if="rowIndex === currentRow"
+              v-model="grid[rowIndex][colIndex]"
+              maxlength="1"
+              @input="moveToNextLetter(colIndex)"
+              @blur="keepFocus()"
+              class="letter-input"
+            />
+            <span v-else class="letter-box-front">{{ letter }}</span>
+          </div>
+          <div class="letter-box-back"
+          :class="getLetterClass(letter.toUpperCase(), rowIndex, colIndex)"
+          >
+            {{ letter }}
+          </div>
+        </div>
       </div>
     </div>
 
@@ -105,6 +116,14 @@ export default {
     const allLetters = reactive([]);
 
     const resetGame = () => {
+      for (let row = 0; row < currentRow.value; row++) {
+        for (let col = 0; col < 5; col++) {
+          const element = getLetterBoxById(col, row);
+          element.classList.remove('flip');
+          element.style.transform = 'rotateY(0deg)'
+        }
+      }
+
       showDialog.value = false;
       guesses.value = [];
       currentCol.value = 0;
@@ -246,12 +265,18 @@ export default {
       const currentGuess = grid.value[currentRow.value].join("");
       const wordInList = checkIfWordInList(currentGuess);
       if (currentGuess.length === 5 && wordInList) {
+        for (let i = 0; i < 5; i++) {
+          const element = getLetterBoxById(i, currentRow.value);
+          setTimeout(() => {
+            element.classList.add('flip');
+          }, i * 500);
+        }
 
         if (checkForWin(currentGuess.toUpperCase())){
           win.value = true;
           setTimeout(() => {
             showDialog.value = true;
-          }, 500)
+          }, 2500)
         }
 
         guesses.value.push(currentGuess.toUpperCase());
@@ -294,7 +319,7 @@ export default {
     }
 
     const checkIfWordInList = (guess) => {
-      return allWords.value.includes(guess);
+      return allWords.value.includes(guess.toLowerCase());
     }
 
     const getCurrentRow = () => {
@@ -304,7 +329,7 @@ export default {
     const readFileToList = async () => {
       const response = await fetch('/src/assets/wordle-solutions-08MAY2022.txt')
       if (response.ok) {
-        allWords.value = (await response.text()).split('\n');
+        allWords.value = (await response.text()).split('\r\n');
       }
     }
 
@@ -353,7 +378,7 @@ export default {
     }
 
     const getLetterBoxById = (colIndex, rowIndex) => {
-      return document.getElementById('col-' + rowIndex + '.' + colIndex);
+      return document.getElementById('col-' + rowIndex + '-' + colIndex);
     }
 
     const getRowById = (rowIndex) => {
@@ -411,6 +436,7 @@ export default {
   height: 4rem;
   width: 4rem;
   border: 2px solid #d3d3d3;
+  perspective: 1000px;
 }
 
 .letter-input {
@@ -418,10 +444,45 @@ export default {
   height: 100%;
   text-align: center;
   font-size: 2rem;
+  font-weight: bold;
   text-transform: uppercase;
   border: none;
   outline: none;
+}
+
+.letter-box-inner {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+  font-size: 2rem;
+  font-weight: bold; 
+  text-transform: uppercase;
+}
+
+.flip .letter-box-inner {
+  transform: rotateY(180deg);
+}
+
+.letter-box-front, .letter-box-back {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden; /* Safari */
+  backface-visibility: hidden;
   font-weight: bold;
+}
+
+.letter-box-back {
+  transform: rotateY(180deg);
 }
 
 .correct {
