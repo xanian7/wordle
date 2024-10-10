@@ -1,11 +1,12 @@
 <template>
   <div class="wordle-container">
-    <div v-for="(row, rowIndex) in grid" :key="rowIndex" class="row">
+    <div v-for="(row, rowIndex) in grid" :key="rowIndex" class="row" :id="'row-' + rowIndex">
       <div
         v-for="(letter, colIndex) in row"
         :key="colIndex"
         class="letter-box"
         :class="getLetterClass(letter.toUpperCase(), rowIndex, colIndex)"
+        :id="'col-' + rowIndex + '.' + colIndex"
       >
         <input
           v-if="rowIndex === currentRow"
@@ -21,7 +22,7 @@
 
     <div class="keyboard">
       <div v-for="(row, rowIndex) in keyboardRows" :key="rowIndex" class="row">
-        <button v-for="(key, colIndex) in row" :key="colIndex" @click="simulateKeyPress(key)" :class="getKeyClass(key, rowIndex, colIndex)">
+        <button v-for="(key, colIndex) in row" :key="colIndex" @click="simulateKeyPress(key)" :class="getKeyClass(key)">
           {{ key }}
         </button>
 
@@ -29,24 +30,13 @@
     </div>
   </div>
 
-  <v-dialog
-      v-model="showDialog"
-      width="auto"
-    >
-      <v-card
-        max-width="400"
-        text="Reset and play again?"
-        :title="getDialogHeader()"
-      >
-        <template v-slot:actions>
-          <v-btn
-            class="ms-auto"
-            text="Play Again"
-            @click="resetGame()"
-          ></v-btn>
-        </template>
-      </v-card>
-    </v-dialog>
+  <div v-if="showDialog" class="popup-overlay">
+    <div class="popup-content">
+      <h1>{{ getDialogHeader() }}</h1>
+      <p>The word was: {{ theWord }}</p>
+      <button @click="resetGame()" class="close-button">Play Again</button>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -70,11 +60,12 @@ export default {
           const row = getCurrentRow();
 
           if (row[currentCol.value].value === "") {
+            
             currentCol.value--;
             row[currentCol.value].focus();
             removeLetter.value = true;
           }
-        } else if (event.keyCode !== 8) {
+        } else if (event.key !== 'Backspace') {
           removeLetter.value = false;
         }
       });
@@ -158,17 +149,22 @@ export default {
           grid.value[currentRow.value][currentCol.value] = "";
         }
       } else {
-        grid.value[currentRow.value][currentCol.value] = key;
-        moveToNextLetter(currentCol.value)
+        removeLetter.value = false;
+        if (grid.value[currentRow.value][currentCol.value] === "") {
+          grid.value[currentRow.value][currentCol.value] = key;
+          moveToNextLetter(currentCol.value)
+        }
       }
     }
 
-    const getKeyClass = (key, rowIndex, colIndex) => {
+    const getKeyClass = (key) => {
       let keyClass = "";
-      if (alreadyGuessed[rowIndex]) {
-        for (let i = 0; i < alreadyGuessed[i].length; i++){
-          for (let ii = 0; ii < alreadyGuessed[i][ii].length; ii++){
-            console.log(alreadyGuessed[i][ii]);
+      if (alreadyGuessed.length > 0) {
+        for (let i = 0; i < alreadyGuessed.length; i++){
+          for (let ii = 0; ii < alreadyGuessed[i].length; ii++){
+            if (alreadyGuessed[i][ii].letter === key) {
+              keyClass = alreadyGuessed[i][ii].class;
+            }
           }
         }
       }
@@ -193,11 +189,6 @@ export default {
 
           if (alreadyGuessed[rowIndex][colIndex]) {
             return alreadyGuessed[rowIndex][colIndex].class;
-          }
-            
-          if (checkForWin(guess)){
-            win.value = true;
-            showDialog.value = true;
           }
 
           let letterClass = ""
@@ -247,13 +238,22 @@ export default {
       const inputs = getCurrentRow();
       if (colIndex < inputs.length - 1 && removeLetter.value === false){
         inputs[colIndex + 1].focus();
-        currentCol.value = colIndex + 1
+        currentCol.value = colIndex + 1;
       }
     }
 
     const submitGuess = () => {
       const currentGuess = grid.value[currentRow.value].join("");
-      if (currentGuess.length === 5) {
+      const wordInList = checkIfWordInList(currentGuess);
+      if (currentGuess.length === 5 && wordInList) {
+
+        if (checkForWin(currentGuess.toUpperCase())){
+          win.value = true;
+          setTimeout(() => {
+            showDialog.value = true;
+          }, 500)
+        }
+
         guesses.value.push(currentGuess.toUpperCase());
         currentRow.value++;
         currentCol.value = 0;
@@ -265,6 +265,12 @@ export default {
           showDialog.value = true
         }
         getAllLetters();
+      } else if (wordInList === false) {
+        const element = getRowById(currentRow.value);
+        element.classList.add('shake');
+        setTimeout(() => {
+          element.classList.remove('shake');
+        }, 200)
       }
     }
 
@@ -285,6 +291,10 @@ export default {
         }
       }
       return true;
+    }
+
+    const checkIfWordInList = (guess) => {
+      return allWords.value.includes(guess);
     }
 
     const getCurrentRow = () => {
@@ -328,20 +338,26 @@ export default {
 
     const getDialogHeader = () => {
       if (win.value){
-        return "You won! The word was: " + theWord.value;
+        return "You Win!";
       } else {
-        return "You lost. The word was: " + theWord.value;
+        return "You Lose.";
       }
     }
 
     const removeLetterAtIndex = (str, index) => {
-      // If the index is out of bounds, return the string unchanged
       if (index < 0 || index >= str.length) {
         return str;
       }
 
-      // Use slice to remove the letter at the specified index
       return str.slice(0, index) + str.slice(index + 1);
+    }
+
+    const getLetterBoxById = (colIndex, rowIndex) => {
+      return document.getElementById('col-' + rowIndex + '.' + colIndex);
+    }
+
+    const getRowById = (rowIndex) => {
+      return document.getElementById('row-' + rowIndex);
     }
 
     return {
@@ -371,6 +387,9 @@ export default {
       simulateKeyPress,
       keepFocus,
       getKeyClass,
+      checkIfWordInList,
+      getLetterBoxById,
+      getRowById,
     }
   }
 }
@@ -383,11 +402,6 @@ export default {
   align-items: center;
   gap: 10px;
   padding: 1rem;
-}
-
-.row {
-  display: flex;
-  gap: 5px;
 }
 
 .letter-box {
@@ -407,24 +421,31 @@ export default {
   text-transform: uppercase;
   border: none;
   outline: none;
+  font-weight: bold;
 }
 
 .correct {
   background-color: #6aaa64;
   color: white;
   border-color: #6aaa64;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
 .misplaced {
   background-color: #c9b458;
   color: white;
   border-color: #c9b458;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
 .incorrect {
   background-color: #787c7e;
   color: white;
   border-color: #787c7e;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
 .keyboard {
@@ -442,15 +463,78 @@ export default {
 
 button {
   min-width: 40px;
-  min-height: 40px;
+  min-height: 50px;
   font-size: 1.2rem;
   background-color: #eee;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-weight: bold;
 }
 
 button:hover {
   background-color: #ccc;
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.popup-content {
+  background: white;
+  padding: 40px;
+  text-align: center;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+p {
+  margin-bottom: 20px;
+}
+
+.close-button {
+  background-color: #6aaa64;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.close-button:hover {
+  background-color: #45a049;
+}
+
+.shake {
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0% {transform: translate(2px, 0px);}
+  10% {transform: translate(-2px, 0px);}
+  20% {transform: translate(2px, 0px);}
+  30% {transform: translate(-2px, 0px);}
+  40% {transform: translate(2px, 0px);}
+  50% {transform: translate(-2px, 0px);}
+  60% {transform: translate(2px, 0px);}
+  70% {transform: translate(-2px, 0px);}
+  80% {transform: translate(2px, 0px);}
+  90% {transform: translate(-2px, 0px);}
+  100% {transform: translate(2px, 0px);}
 }
 </style>
