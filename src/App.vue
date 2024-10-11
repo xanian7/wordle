@@ -1,18 +1,32 @@
 <template>
-  <v-app>
-    <v-app-bar app>
-      <template v-slot:prepend>
-        <nav>
-          <RouterLink to="/">Home</RouterLink>
-          <RouterLink to="/wordle">Worlde</RouterLink>
-        </nav>
-      </template>
-    </v-app-bar>
-    <v-main>
-      <RouterView />
-    </v-main>
-  </v-app>
+  <body>
+    <TopBar></TopBar>
+    <ToggleButton></ToggleButton>
+    <nav>
+      <RouterLink to="/">Home</RouterLink>
+      <RouterLink to="/wordle">Worlde</RouterLink>
+    </nav>
+    <RouterView />
+  </body>
 </template>
+
+<script>
+import { defineComponent, ref } from 'vue';
+import ToggleButton from './components/ToggleButton.vue';
+import TopBar from './components/TopBar.vue';
+
+export default defineComponent ({
+  name: 'App',
+  components: {
+    ToggleButton,
+    TopBar,
+  },
+  
+  setup() {
+    
+  },
+})
+</script>
 
 <style scoped>
 header {
