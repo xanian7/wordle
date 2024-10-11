@@ -278,7 +278,7 @@ export default {
             showDialog.value = true;
           }, 2500)
         }
-
+        
         guesses.value.push(currentGuess.toUpperCase());
         currentRow.value++;
         currentCol.value = 0;
@@ -287,7 +287,7 @@ export default {
         if (currentRow.value < 6){
           focusNextRow();
         } else {
-          showDialog.value = true
+          showDialog.value = true;
         }
         getAllLetters();
       } else if (wordInList === false) {
