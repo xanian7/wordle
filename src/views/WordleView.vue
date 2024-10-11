@@ -329,7 +329,7 @@ export default {
     const readFileToList = async () => {
       const response = await fetch('/src/assets/wordle-solutions-08MAY2022.txt')
       if (response.ok) {
-        allWords.value = (await response.text()).split('\r\n');
+        allWords.value = (await response.text()).split(/\r?\n/);
       }
     }
 
