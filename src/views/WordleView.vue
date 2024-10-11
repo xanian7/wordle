@@ -19,8 +19,14 @@
               @input="moveToNextLetter(colIndex)"
               @blur="keepFocus()"
               class="letter-input"
+              :class="isDarkMode ? 'input-dark' : 'input-light'"
             />
-            <span v-else class="letter-box-front">{{ letter }}</span>
+            <span v-else 
+              class="letter-box-front"
+              :class="isDarkMode ? 'input-dark' : 'input-light'"
+            >
+            {{ letter }}
+            </span>
           </div>
           <div class="letter-box-back"
           :class="getLetterClass(letter.toUpperCase(), rowIndex, colIndex)"
@@ -33,7 +39,8 @@
 
     <div class="keyboard">
       <div v-for="(row, rowIndex) in keyboardRows" :key="rowIndex" class="row">
-        <button v-for="(key, colIndex) in row" :key="colIndex" @click="simulateKeyPress(key)" :class="getKeyClass(key)">
+        <button v-for="(key, colIndex) in row" :key="colIndex" @click="simulateKeyPress(key)" 
+        :class="[isDarkMode ? 'dark' : 'light', getKeyClass(key)]">
           {{ key }}
         </button>
 
@@ -51,7 +58,7 @@
 </template>
 
 <script>
-import { ref, onMounted, nextTick, onBeforeMount, reactive } from 'vue'
+import { ref, onMounted, nextTick, onBeforeMount, reactive, inject } from 'vue';
 
 export default {
   setup() {
@@ -87,6 +94,8 @@ export default {
       inputs[currentCol.value].focus;
     }
     
+    const isDarkMode = inject('isDarkMode', ref(false));
+
     const grid = ref([
       ["", "", "", "", ""],
       ["", "", "", "", ""],
@@ -397,6 +406,7 @@ export default {
       alreadyGuessed,
       allLetters,
       keyboardRows,
+      isDarkMode,
       getLetterClass,
       moveToNextLetter,
       submitGuess,
@@ -435,8 +445,23 @@ export default {
   align-items: center;
   height: 4rem;
   width: 4rem;
-  border: 2px solid #d3d3d3;
   perspective: 1000px;
+}
+
+.letter-box-dark {
+  border: 2px solid #3A3A3C;
+}
+
+.letter-box-light {
+  border: 2px solid #d3d3d3;
+}
+
+.input-dark {
+  color: #D7DADC;
+}
+
+.input-light {
+  color: black;
 }
 
 .letter-input {
@@ -446,7 +471,6 @@ export default {
   font-size: 2rem;
   font-weight: bold;
   text-transform: uppercase;
-  border: none;
   outline: none;
 }
 
@@ -463,6 +487,7 @@ export default {
   font-size: 2rem;
   font-weight: bold; 
   text-transform: uppercase;
+  border: 2px solid #d3d3d3;
 }
 
 .flip .letter-box-inner {
@@ -486,7 +511,7 @@ export default {
 }
 
 .correct {
-  background-color: #6aaa64;
+  background-color: #6aaa64 !important;
   color: white;
   border-color: #6aaa64;
   text-transform: uppercase;
@@ -494,7 +519,7 @@ export default {
 }
 
 .misplaced {
-  background-color: #c9b458;
+  background-color: #c9b458 !important;
   color: white;
   border-color: #c9b458;
   text-transform: uppercase;
@@ -502,7 +527,7 @@ export default {
 }
 
 .incorrect {
-  background-color: #787c7e;
+  background-color: #787c7e !important;
   color: white;
   border-color: #787c7e;
   text-transform: uppercase;
@@ -514,6 +539,16 @@ export default {
   flex-direction: column;
   gap: 5px;
 }
+
+.dark {
+  background-color: #3A3A3C;
+  color: #D7DADC;
+}
+
+.light {
+  color: black;
+}
+
 
 .row {
   display: flex;

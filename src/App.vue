@@ -1,29 +1,30 @@
 <template>
-  <body>
+  <body :class="isDarkMode ? 'dark' : 'light'">
+    <NavBar />
     <TopBar></TopBar>
-    <ToggleButton></ToggleButton>
-    <nav>
-      <RouterLink to="/">Home</RouterLink>
-      <RouterLink to="/wordle">Worlde</RouterLink>
-    </nav>
     <RouterView />
   </body>
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue';
-import ToggleButton from './components/ToggleButton.vue';
+import { defineComponent, ref, provide } from 'vue';
 import TopBar from './components/TopBar.vue';
+import NavBar from './components/NavBar.vue';
 
 export default defineComponent ({
   name: 'App',
   components: {
-    ToggleButton,
     TopBar,
+    NavBar,
   },
   
   setup() {
-    
+    const isDarkMode = ref(false);
+    provide('isDarkMode', isDarkMode);
+
+    return {
+      isDarkMode,
+    }
   },
 })
 </script>
@@ -34,33 +35,27 @@ header {
   max-height: 100vh;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.dark {
+  background-color: #292929;
+  color: white;
+  transition: 0.3s;
 }
 
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+.light {
+  background-color: white;
+  color: #121212;
+  transition: 0.3s;
 }
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
+body {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
 }
 </style>
