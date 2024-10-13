@@ -68,7 +68,7 @@ export default defineComponent ({
     input:checked + label:after {
         left: 58px;
         transform: translate(-100%);
-        background: linear-gradient(180deg, #777, #3a3a3a);
+        background: linear-gradient(180deg, #4834a0, #32236b);
     }
 
     label:active:after {
