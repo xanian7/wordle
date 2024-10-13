@@ -1,7 +1,4 @@
 <template>
-    <div class="container"
-        :class="[isDarkMode ? 'dark' : 'light', isOpen ? 'open' : 'close']"
-    >      
     <div class="burger-icon" 
         :class="{ active: isOpen }"
         @click="openMenu()">
@@ -13,6 +10,9 @@
             :class="{ 'line3-short': isOpen }"
         ></div>
     </div>
+    <div class="container"
+        :class="[isDarkMode ? 'dark' : 'light', isOpen ? 'open' : 'close']"
+    >      
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/wordle">Worlde</RouterLink>
     </div>
@@ -27,7 +27,7 @@ export default defineComponent({
 
         const isDarkMode = inject('isDarkMode', ref(false));
 
-        const isOpen = ref(false);
+        const isOpen = ref(true);
         const openMenu = () => {
             isOpen.value = !isOpen.value;
             return !isOpen.value
@@ -53,7 +53,8 @@ export default defineComponent({
         z-index: 1000;
         display: flex;
         align-items: center;
-        justify-content: center;
+        flex-direction: column;
+        transition: 0.3s;
     }
 
     button {
@@ -68,6 +69,7 @@ export default defineComponent({
         justify-content: space-between;
         flex-direction: column;
         cursor: pointer;
+        margin: 1rem;
     }
 
     .burger-line {
@@ -107,5 +109,13 @@ export default defineComponent({
         width: 50%; 
         margin-left: auto; 
         transition: 0.3s; 
+    }
+
+    .open {
+        transform: translate(0vw);
+    }
+
+    .close {
+        transform: translate(-11vw);
     }
 </style>
