@@ -1,28 +1,20 @@
 <template>
     <div class="container"
-        :class="[isDarkMode ? 'dark' : 'light', isOpen ? 'open' : 'close']"
+        :class="[isDarkMode ? 'dark' : 'light', isNavOpen ? 'open' : 'close']"
     >     
-    <div class="burger-icon" 
-        :class="{ active: isOpen }"
-        @click="openMenu()">
-        <div class="burger-line line1"
-            :class="{ 'line1-short': isOpen }"
-        ></div>
-        <div class="burger-line line2"></div>
-        <div class="burger-line line3"
-            :class="{ 'line3-short': isOpen }"
-        ></div>
-    </div> 
         <div class="nav-item" @click="goToRoute('home')">
-            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"/></svg>
-            <div>Home</div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="nav-item-icon" viewBox="0 -960 960 960"  fill="#e8eaed"><path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"/></svg>
+            <h2>Home</h2>
         </div>
-        <div>
+        <hr class="solid"
+            :class="isDarkMode ? 'dark' : 'light'"
+        >
+        <h2>
             Games
-        </div>
+        </h2>
         <div class="nav-item" @click="goToRoute('wordle')">
-            <img src="/src/components/icons/64px-Wordle_Logo.svg.png" height="24px" width="24px"/>
-            <div>Wordle</div>
+            <img src="/src/components/icons/64px-Wordle_Logo.svg.png" class="nav-item-icon"/>
+            <h2>Wordle</h2>
         </div>
     </div>
 </template>
@@ -37,12 +29,7 @@ export default defineComponent({
         const router = useRouter();
 
         const isDarkMode = inject('isDarkMode', ref(false));
-
-        const isOpen = ref(true);
-        const openMenu = () => {
-            isOpen.value = !isOpen.value;
-            return !isOpen.value
-        }
+        const isNavOpen = inject('isNavOpen', ref(false));
 
         const goToRoute = (route) => {
             router.push({ name: route })
@@ -50,9 +37,8 @@ export default defineComponent({
 
         return {
             isDarkMode,
-            isOpen,
+            isNavOpen,
             router,
-            openMenu,
             goToRoute,
         }
     },
@@ -75,81 +61,13 @@ export default defineComponent({
         transition: 0.3s;
     }
 
-    button {
-        outline: solid 2px;
-        margin: 1rem;
-    }
-
-    .burger-icon {
-        width: 30px;  
-        height: 20px;  
-        display: flex;
-        justify-content: space-between;
-        flex-direction: column;
-        cursor: pointer;
-        margin: 2rem;
-        transform: translateX(8vw);
-        transition: 0.3s;
-        position: fixed;
-    }
-
-    .burger-icon.active {
-        transform: translateX(6vw);
-    }
-
-    .burger-line {
-        width: 100%;   
-        height: 2px;   
-        background-color: #333;  
-        border-radius: 5px; 
-        transition: 0.5s; 
-    }
-
-    .dark .burger-line {
-        background-color: white;
-    }
-
-    .dark .burger-icon:hover .burger-line {
-        background-color: #d3d3d3;  
-    }
-
-    .burger-icon:hover .burger-line {
-        background-color: #555;  
-    }
-
-    .burger-icon.active .line1 {
-        transform: rotate(-45deg) translate(-10px, -4px);
-        transition: 0.3s; 
-    }
-
-    .burger-line.line1.line1-short {
-        width: 50%; 
-        margin-left: auto;
-        transition: 0.3s;  
-    }
-
-    .burger-icon.active .line2 {
-        transform: translate(14px, 0px);
-        transition: 0.3s; 
-    }
-
-    .burger-icon.active .line3 {
-        transform: rotate(45deg) translate(-10px, 4px);
-        transition: 0.3s; 
-    }
-
-    .burger-line.line3.line3-short {
-        width: 50%; 
-        margin-left: auto; 
-        transition: 0.3s; 
-    }
-
     .open {
         transform: translate(0vw);
     }
 
     .close {
         transform: translate(-11vw);
+        visibility: hidden;
     }
 
     .dark {
@@ -176,9 +94,31 @@ export default defineComponent({
 
     .dark .nav-item:hover {
         background: #414141;
+        transition: 0.3s;
     }
 
     .light .nav-item:hover {
         background: #d3d3d3;
+        transition: 0.3s;
+    }
+
+    .nav-item-icon {
+        width: 36px;
+        height: 36px;
+        margin: 1rem;
+    }
+
+    h2 {
+        margin: 1rem;
+    }
+
+    hr.solid {
+        border: 1px solid #e9e9e9;
+        width: 100%;
+    }
+
+    .dark hr.solid {
+        border: 1px solid #3d3d3d;
+        color: #3a3a3a;
     }
 </style>

@@ -20,10 +20,13 @@ export default defineComponent ({
   
   setup() {
     const isDarkMode = ref(false);
+    const isNavOpen = ref(false);
     provide('isDarkMode', isDarkMode);
+    provide('isNavOpen', isNavOpen);
 
     return {
       isDarkMode,
+      isNavOpen,
     }
   },
 })

@@ -593,6 +593,10 @@ button:hover {
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
 }
 
+.dark .popup-content {
+  background: #3A3A3C;
+}
+
 h1 {
   font-size: 2rem;
   margin-bottom: 10px;

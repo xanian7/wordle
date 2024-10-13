@@ -2,6 +2,7 @@
     <div class="topbar"
         :class="isDarkMode ? 'dark' : 'light'"
     >
+        <BurgerItem></BurgerItem>
         <ToggleButton class="toggle-button" />
     </div>
 </template>
@@ -9,17 +10,21 @@
 <script>
 import { defineComponent, inject, ref } from 'vue'
 import ToggleButton from './ToggleButton.vue';
+import BurgerItem from './Burger.vue';
 
 export default defineComponent({
     name: 'TopBar',
     components: {
         ToggleButton,
+        BurgerItem,
     },
     setup() {
 
         const isDarkMode = inject('isDarkMode', ref(false));
+        const isNavOpen = inject('isNavOpen', ref(false));
         return {
             isDarkMode,
+            isNavOpen,
         }
     },
 })
@@ -33,7 +38,7 @@ export default defineComponent({
     height: 7vh;
     position: absolute;
     display: flex;
-    align-content: center;
+    align-items: center;
     top: 0;
     box-shadow: 0 10px 10px -5px rgba(0, 0, 0, 0.3);
     left: 0;
