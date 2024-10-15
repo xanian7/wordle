@@ -91,8 +91,8 @@ export default defineComponent({
         flex-direction: row;
         align-items: center;
         cursor: pointer;
-        padding: 0.5vw;
-        margin: 0.5vw;
+        padding: 1px;
+        margin: 10px;
         border-radius: 5px;
     }
 
@@ -109,11 +109,11 @@ export default defineComponent({
     .nav-item-icon {
         width: 24px;
         height: 24px;
-        margin: vw;
+        margin: 10px;
     }
 
     h2 {
-        margin: 1vw;
+        margin: 10px;
         font-size: 15px;
     }
 
