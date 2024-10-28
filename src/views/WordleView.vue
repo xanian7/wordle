@@ -59,11 +59,12 @@
 
 <script>
 import { ref, onMounted, nextTick, onBeforeMount, reactive, inject } from 'vue';
+import { useSolutions } from '/src/stores/solutions'
 
 export default {
   setup() {
-    onBeforeMount(async () => {
-      await readFileToList();
+    onBeforeMount(() => {
+      readStoreToList();
       selectTheWord();
     });
 
@@ -95,6 +96,8 @@ export default {
     }
     
     const isDarkMode = inject('isDarkMode', ref(false));
+
+    const solutions = useSolutions()
 
     const grid = ref([
       ["", "", "", "", ""],
@@ -335,11 +338,8 @@ export default {
       return document.querySelectorAll('.letter-input');
     }
 
-    const readFileToList = async () => {
-      const response = await fetch('/src/assets/wordle-solutions-08MAY2022.txt')
-      if (response.ok) {
-        allWords.value = (await response.text()).split(/\r?\n/);
-      }
+    const readStoreToList = () => {
+        allWords.value = solutions.all;
     }
 
     const selectTheWord = () => {
@@ -414,7 +414,7 @@ export default {
       checkForWin,
       resetGame,
       getCurrentRow,
-      readFileToList,
+      readStoreToList,
       selectTheWord,
       getDialogHeader,
       removeLetterAtIndex,
@@ -566,6 +566,18 @@ button {
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
+}
+
+@media screen and (max-width: 980px) {
+  .letter-box {
+    height: 3rem;
+    width: 3rem;
+  }
+
+  button {
+    min-width: 30px;
+    min-height: 40px;
+  }
 }
 
 button:hover {

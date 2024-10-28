@@ -35,7 +35,7 @@ export default defineComponent({
 .topbar {
     background: white;
     width: 100vw;
-    height: 7vh;
+    height: 100px;
     position: absolute;
     display: flex;
     align-items: center;
