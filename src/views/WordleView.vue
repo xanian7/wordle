@@ -437,6 +437,8 @@ export default {
   align-items: center;
   gap: 10px;
   padding: 1rem;
+  position: absolute;
+  top: 150px;
 }
 
 .letter-box {
