@@ -579,6 +579,7 @@ button {
   button {
     min-width: 30px;
     min-height: 40px;
+    font-size: 1rem;
   }
 }
 
