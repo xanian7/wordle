@@ -53,7 +53,7 @@ export default defineComponent({
     .container {
         position: fixed;
         background: white;
-        width: 10vw;
+        width: 200px;
         height: 100vh;
         box-shadow: 5px 0 10px rgba(0, 0, 0, 0.3);
         top: 0;
@@ -66,11 +66,11 @@ export default defineComponent({
     }
 
     .open {
-        transform: translate(0vw);
+        transform: translate(0px);
     }
 
     .close {
-        transform: translate(-11vw);
+        transform: translate(-200px);
         visibility: hidden;
     }
 
