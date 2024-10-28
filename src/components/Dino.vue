@@ -17,15 +17,21 @@ export default defineComponent({
                     jump();
                 }
             })
+
+            document.addEventListener("click", function() {
+                jump();
+            });
         });
+
+        
 
         const dino = ref(null);
         const isJumping = ref(false);
 
         const position = ref(0);
         let velocity = 0;
-        const gravity = -0.15
-        const jumpForce = 10;
+        const gravity = -0.1 
+        const jumpForce = 4;
         let animationFrameId = null;
 
         const applyPhysics = () => {

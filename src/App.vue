@@ -37,7 +37,7 @@ export default defineComponent ({
 @font-face {
     font-family: 'tiny5';
     src: url('@/assets/Tiny5-Regular.ttf');
-  }
+}
 .dark {
   background-color: #292929;
   color: white;

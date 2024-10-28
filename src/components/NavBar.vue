@@ -64,6 +64,7 @@ export default defineComponent({
         align-items: center;
         flex-direction: column;
         transition: 0.3s;
+        font-family: 'tiny5';
     }
 
     .open {

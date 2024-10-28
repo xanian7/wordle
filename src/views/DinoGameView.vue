@@ -1,6 +1,6 @@
 <template>
   <div class="game" :class="isDarkMode ? 'dark' : 'light'">
-    <DinoPlayer ref="dino"></DinoPlayer>
+    <DinoPlayer ref="dino" class="dino"></DinoPlayer>
     <Cactus v-for="(cactus, index) in cacti" 
       :key="index" 
       ref="cactusRefs" 
@@ -211,6 +211,7 @@ export default defineComponent({
 </script>
 
 <style>
+
 .game {
   position: relative;
   display: flex;
@@ -239,6 +240,11 @@ export default defineComponent({
   z-index: 999;
 }
 
+.dino {
+  position: absolute;
+  left: 25px;
+}
+
 h1 {
   font-size: 2rem;
   margin-bottom: 10px;
@@ -246,6 +252,7 @@ h1 {
 
 p {
   margin-bottom: 20px;
+  font-family: 'tiny5';
 }
 
 .start-button-content {
@@ -286,6 +293,7 @@ p {
 .score {
   position: absolute;
   top: 0;
+  font-family: 'tiny5';
 }
 
 .ground {
