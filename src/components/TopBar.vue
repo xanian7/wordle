@@ -46,8 +46,7 @@ export default defineComponent({
 
 .toggle-button {
     position: absolute;
-    left: 95vw;
-    top: 2vh;
+    right: 50px;
     display: flex;
     align-content: center;
 }
