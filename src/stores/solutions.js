@@ -2311,7 +2311,8 @@ export const useSolutions = defineStore('solutions', {
                 "youth",
                 "zebra",
                 "zesty",
-                "zonal"
+                "zonal",
+                "penis"
             ]
     })
 })

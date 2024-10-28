@@ -37,6 +37,7 @@ export default defineComponent({
 
         const goToRoute = (route) => {
             router.push({ name: route })
+            isNavOpen.value = !isNavOpen.value;
         }
 
         return {
