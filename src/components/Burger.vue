@@ -49,7 +49,7 @@ export default defineComponent({
     }
 
     .burger-icon.active {
-        transform: translateX(9vw);
+        transform: translateX(200px);
     }
 
     .burger-line {
