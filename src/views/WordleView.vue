@@ -436,7 +436,6 @@ export default {
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding: 1rem;
   position: absolute;
   top: 150px;
 }
@@ -579,7 +578,7 @@ button {
   button {
     min-width: 30px;
     min-height: 40px;
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 }
 
