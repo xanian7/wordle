@@ -12,7 +12,7 @@
       >
         <div class="letter-box-inner">
           <div class="letter-box-front">
-            <input disabled
+            <input readonly
               v-if="rowIndex === currentRow"
               v-model="grid[rowIndex][colIndex]"
               maxlength="1"
